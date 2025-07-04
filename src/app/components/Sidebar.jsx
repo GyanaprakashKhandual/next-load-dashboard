@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Table,
@@ -15,28 +15,70 @@ import {
   Filter,
   RotateCcw
 } from 'lucide-react';
-
-import { FaHome, FaMoon, FaScrewdriver } from 'react-icons/fa';
+import { FaHome, FaMoon, FaSun, FaScrewdriver } from 'react-icons/fa';
+// import Home from './pages/Home';
+// import TableView from './pages/TableView';
+// import CardView from './pages/CardView';
+// import PieChartView from './pages/PieChartView';
+// import Bugs from './pages/Bugs';
+// import Analysis from './pages/Analysis';
+// import Documentation from './pages/Documentation';
+// import Comments from './pages/Comments';
+// import Project from './pages/Project';
+// import Suggestions from './pages/Suggestions';
 
 const Sidebar = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+  const [currentComponent, setCurrentComponent] = useState(<Home />);
+
+  // Check for user's preferred color scheme
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(isDark);
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+  }, []);
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    document.documentElement.classList.toggle('dark', newMode);
+  };
 
   const sidebarItems = [
-    { icon: FaHome, label: 'Home' },
-    { icon: Table, label: 'Table View' },
-    { icon: CreditCard, label: 'Card View' },
-    { icon: PieChart, label: 'Pie Chart View' },
-    { icon: Bug, label: 'Bugs' },
-    { icon: BarChart3, label: 'Analysis' },
-    { icon: Sheet, label: 'Documentation' },
-    { icon: TrendingUp, label: 'Comments' },
-    { icon: User, label: 'Project' },
-    { icon: Lightbulb, label: 'Suggestions' },
+    { icon: FaHome, label: 'Home', component: <Home /> },
+    { icon: Table, label: 'Table View', component: <TableView /> },
+    { icon: CreditCard, label: 'Card View', component: <CardView /> },
+    { icon: PieChart, label: 'Pie Chart View', component: <PieChartView /> },
+    { icon: Bug, label: 'Bugs', component: <Bugs /> },
+    { icon: BarChart3, label: 'Analysis', component: <Analysis /> },
+    { icon: Sheet, label: 'Documentation', component: <Documentation /> },
+    { icon: TrendingUp, label: 'Comments', component: <Comments /> },
+    { icon: User, label: 'Project', component: <Project /> },
+    { icon: Lightbulb, label: 'Suggestions', component: <Suggestions /> },
     { icon: Filter, label: 'Filter' },
-    { icon: FaMoon, label: 'Dark Mode' }, 
+    { 
+      icon: darkMode ? FaSun : FaMoon, 
+      label: darkMode ? 'Light Mode' : 'Dark Mode',
+      action: toggleDarkMode
+    },
     { icon: RotateCcw, label: 'Refresh' },
   ];
+
+  const handleItemClick = (index: number) => {
+    setActiveIndex(index);
+    const item = sidebarItems[index];
+    
+    if (item.action) {
+      item.action();
+    } else if (item.component) {
+      setCurrentComponent(item.component);
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0, x: -60 },
@@ -79,85 +121,120 @@ const Sidebar = () => {
     }
   };
 
+  const themeIconVariants = {
+    moon: { rotate: 0, scale: 1 },
+    sun: { rotate: 360, scale: 1.1 },
+    transition: { duration: 0.5, ease: "easeInOut" }
+  };
+
   return (
-    <motion.div
-      className="fixed left-0 top-0 h-screen w-[60px] bg-gradient-to-r from-blue-50 via-white to-purple-100  z-40 overflow-visible"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className={`flex h-screen ${darkMode ? 'dark' : ''}`}>
+      <motion.div
+        className={`fixed left-0 top-0 h-screen w-[60px] ${
+          darkMode 
+            ? 'bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800' 
+            : 'bg-gradient-to-r from-blue-50 via-white to-purple-100'
+        } z-40 overflow-visible`}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Sidebar Items */}
+        <div className="flex flex-col py-4 space-y-2">
+          {sidebarItems.map((item, index) => {
+            const Icon = item.icon;
+            const isActive = activeIndex === index;
+            const isHovered = hoveredIndex === index;
 
-      {/* Sidebar Items */}
-      <div className="flex flex-col py-4 space-y-2">
-        {sidebarItems.map((item, index) => {
-          const Icon = item.icon;
-          const isActive = activeIndex === index;
-          const isHovered = hoveredIndex === index;
-
-          return (
-            <motion.div
-              key={index}
-              className="relative group"
-              variants={itemVariants}
-              whileHover="hover"
-              whileTap="tap"
-              initial="rest"
-              animate="rest"
-              onHoverStart={() => setHoveredIndex(index)}
-              onHoverEnd={() => setHoveredIndex(null)}
-            >
-              <motion.button
-                className="w-full h-12 flex items-center justify-center relative overflow-visible"
-                onClick={() => setActiveIndex(index)}
+            return (
+              <motion.div
+                key={index}
+                className="relative group"
+                variants={itemVariants}
+                whileHover="hover"
+                whileTap="tap"
+                initial="rest"
+                animate="rest"
+                onHoverStart={() => setHoveredIndex(index)}
+                onHoverEnd={() => setHoveredIndex(null)}
               >
-                {/* Active green bar */}
-                <motion.div
-                  className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-r-full"
-                  initial={{ scaleY: 0 }}
-                  animate={{ scaleY: isActive ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                />
-
-                {/* Icon */}
-                <motion.div
-                  className="relative z-10"
-                  variants={iconVariants}
+                <motion.button
+                  className="w-full h-12 flex items-center justify-center relative overflow-visible"
+                  onClick={() => handleItemClick(index)}
                 >
-                  <Icon
-                    size={20}
-                    className={`transition-colors duration-200 ${
-                      isActive
-                        ? 'text-green-700'
-                        : 'text-green-500 group-hover:text-green-700'
+                  {/* Active indicator bar */}
+                  <motion.div
+                    className={`absolute left-0 top-0 h-full w-1 rounded-r-full ${
+                      darkMode ? 'bg-green-400' : 'bg-green-500'
                     }`}
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: isActive ? 1 : 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
                   />
-                </motion.div>
 
-                {/* Tooltip */}
-                <AnimatePresence>
-                  {isHovered && (
-                    <motion.div
-                      variants={tooltipVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      className="absolute left-16 top-1/2 -translate-y-1/2 z-50 pointer-events-none"
-                    >
-                      <div className="px-4 py-2 rounded-xl text-sm font-semibold shadow-xl bg-white border border-gray-300 whitespace-nowrap">
-                        <span className="text-green-700 font-semibold">
-                          {item.label}
-                        </span>
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-white" />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            </motion.div>
-          );
-        })}
+                  {/* Icon with special animation for theme toggle */}
+                  <motion.div
+                    className="relative z-10"
+                    variants={item.label.includes('Mode') ? themeIconVariants : iconVariants}
+                    animate={
+                      item.label.includes('Mode') 
+                        ? darkMode ? 'sun' : 'moon'
+                        : undefined
+                    }
+                  >
+                    <Icon
+                      size={20}
+                      className={`transition-colors duration-200 ${
+                        isActive
+                          ? darkMode 
+                            ? 'text-green-300' 
+                            : 'text-green-700'
+                          : darkMode
+                            ? 'text-gray-300 group-hover:text-green-300'
+                            : 'text-green-500 group-hover:text-green-700'
+                      }`}
+                    />
+                  </motion.div>
+
+                  {/* Tooltip */}
+                  <AnimatePresence>
+                    {isHovered && (
+                      <motion.div
+                        variants={tooltipVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        className="absolute left-16 top-1/2 -translate-y-1/2 z-50 pointer-events-none"
+                      >
+                        <div className={`px-4 py-2 rounded-xl text-sm font-semibold shadow-xl ${
+                          darkMode 
+                            ? 'bg-gray-800 border-gray-600' 
+                            : 'bg-white border-gray-300'
+                        } border whitespace-nowrap`}>
+                          <span className={`${
+                            darkMode ? 'text-green-300' : 'text-green-700'
+                          } font-semibold`}>
+                            {item.label}
+                          </span>
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-white dark:border-r-gray-800" />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Main Content Area */}
+      <div className={`flex-1 ml-[60px] ${
+        darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+      }`}>
+        {currentComponent}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
