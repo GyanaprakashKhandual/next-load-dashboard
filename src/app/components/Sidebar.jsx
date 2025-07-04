@@ -16,11 +16,14 @@ import {
   RotateCcw
 } from 'lucide-react';
 
+import { FaHome, FaMoon, FaScrewdriver } from 'react-icons/fa';
+
 const Sidebar = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const sidebarItems = [
+    { icon: FaHome, label: 'Home' },
     { icon: Table, label: 'Table View' },
     { icon: CreditCard, label: 'Card View' },
     { icon: PieChart, label: 'Pie Chart View' },
@@ -31,6 +34,7 @@ const Sidebar = () => {
     { icon: User, label: 'Project' },
     { icon: Lightbulb, label: 'Suggestions' },
     { icon: Filter, label: 'Filter' },
+    { icon: FaMoon, label: 'Dark Mode' }, 
     { icon: RotateCcw, label: 'Refresh' },
   ];
 
@@ -77,7 +81,7 @@ const Sidebar = () => {
 
   return (
     <motion.div
-      className="fixed left-0 top-0 mt-16 h-screen w-[60px] bg-gradient-to-r from-blue-50 via-white to-purple-100  z-40 overflow-visible"
+      className="fixed left-0 top-0 h-screen w-[60px] bg-gradient-to-r from-blue-50 via-white to-purple-100  z-40 overflow-visible"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
