@@ -16,6 +16,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { FaHome, FaMoon, FaSun, FaScrewdriver } from 'react-icons/fa';
+import Home from '../pages/Home';
+import Card from '../pages/Card';
 // import Home from './pages/Home';
 // import TableView from './pages/TableView';
 // import CardView from './pages/CardView';
@@ -51,15 +53,15 @@ const Sidebar = () => {
 
   const sidebarItems = [
     { icon: FaHome, label: 'Home', component: <Home /> },
-    { icon: Table, label: 'Table View', component: <TableView /> },
-    { icon: CreditCard, label: 'Card View', component: <CardView /> },
-    { icon: PieChart, label: 'Pie Chart View', component: <PieChartView /> },
-    { icon: Bug, label: 'Bugs', component: <Bugs /> },
-    { icon: BarChart3, label: 'Analysis', component: <Analysis /> },
-    { icon: Sheet, label: 'Documentation', component: <Documentation /> },
-    { icon: TrendingUp, label: 'Comments', component: <Comments /> },
-    { icon: User, label: 'Project', component: <Project /> },
-    { icon: Lightbulb, label: 'Suggestions', component: <Suggestions /> },
+    { icon: Table, label: 'Table View', component: <Home /> },
+    { icon: CreditCard, label: 'Card View', component: <Card/> },
+    { icon: PieChart, label: 'Pie Chart View', component: <Home /> },
+    { icon: Bug, label: 'Bugs', component: <Home /> },
+    { icon: BarChart3, label: 'Analysis', component: <Home  /> },
+    { icon: Sheet, label: 'Documentation', component: <Home/> },
+    { icon: TrendingUp, label: 'Comments', component: <Home /> },
+    { icon: User, label: 'Project', component: <Home /> },
+    { icon: Lightbulb, label: 'Suggestions', component: <Home  /> },
     { icon: Filter, label: 'Filter' },
     { 
       icon: darkMode ? FaSun : FaMoon, 
@@ -69,7 +71,7 @@ const Sidebar = () => {
     { icon: RotateCcw, label: 'Refresh' },
   ];
 
-  const handleItemClick = (index: number) => {
+  const handleItemClick = (index) => {
     setActiveIndex(index);
     const item = sidebarItems[index];
     
@@ -140,7 +142,7 @@ const Sidebar = () => {
         animate="visible"
       >
         {/* Sidebar Items */}
-        <div className="flex flex-col py-4 space-y-2">
+        <div className="flex flex-col py-4 space-y-2 user-select-none">
           {sidebarItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = activeIndex === index;
