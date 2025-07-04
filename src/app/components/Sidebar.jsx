@@ -18,8 +18,7 @@ import {
 import { FaHome, FaMoon, FaSun, FaScrewdriver } from 'react-icons/fa';
 import Home from '../pages/Home';
 import Card from '../pages/Card';
-// import Home from './pages/Home';
-// import TableView from './pages/TableView';
+import TableView from '../pages/Table'
 // import CardView from './pages/CardView';
 // import PieChartView from './pages/PieChartView';
 // import Bugs from './pages/Bugs';
@@ -53,7 +52,7 @@ const Sidebar = () => {
 
   const sidebarItems = [
     { icon: FaHome, label: 'Home', component: <Home /> },
-    { icon: Table, label: 'Table View', component: <Home /> },
+    { icon: Table, label: 'Table View', component: <TableView /> },
     { icon: CreditCard, label: 'Card View', component: <Card/> },
     { icon: PieChart, label: 'Pie Chart View', component: <Home /> },
     { icon: Bug, label: 'Bugs', component: <Home /> },
