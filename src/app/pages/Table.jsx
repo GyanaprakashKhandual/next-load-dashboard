@@ -29,7 +29,7 @@ const Table = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/load-test-result');
+        const response = await fetch('https://jwellary-backend-load-test-result.onrender.com/api/load-test-result');
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

@@ -20,7 +20,7 @@ const Chart = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/load-test-result');
+      const response = await fetch('https://jwellary-backend-load-test-result.onrender.com/api/load-test-result');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

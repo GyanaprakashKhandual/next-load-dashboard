@@ -23,132 +23,15 @@ const Card = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Sample test data
-  const sampleData = [
-    {
-      name: "Example Website",
-      tests: [
-        {
-          network: "4G",
-          metrics: {
-            status: {
-              result: "pass",
-              passRate: "98.5%",
-              passCount: 197,
-              failCount: 3
-            },
-            responseTime: {
-              result: "pass",
-              passRate: "95.0%",
-              passCount: 190,
-              failCount: 10
-            },
-            duration: {
-              avg: "1.2s",
-              min: "0.8s",
-              max: "2.5s",
-              med: "1.1s",
-              p90: "1.8s",
-              p95: "2.1s"
-            }
-          }
-        },
-        {
-          network: "3G",
-          metrics: {
-            status: {
-              result: "pass",
-              passRate: "96.0%",
-              passCount: 192,
-              failCount: 8
-            },
-            responseTime: {
-              result: "fail",
-              passRate: "85.5%",
-              passCount: 171,
-              failCount: 29
-            },
-            duration: {
-              avg: "2.5s",
-              min: "1.2s",
-              max: "4.8s",
-              med: "2.3s",
-              p90: "3.7s",
-              p95: "4.2s"
-            }
-          }
-        }
-      ]
-    },
-    {
-      name: "API Service",
-      tests: [
-        {
-          network: "WiFi",
-          metrics: {
-            status: {
-              result: "pass",
-              passRate: "99.9%",
-              passCount: 999,
-              failCount: 1
-            },
-            responseTime: {
-              result: "pass",
-              passRate: "99.2%",
-              passCount: 992,
-              failCount: 8
-            },
-            duration: {
-              avg: "0.4s",
-              min: "0.1s",
-              max: "1.2s",
-              med: "0.3s",
-              p90: "0.8s",
-              p95: "1.0s"
-            }
-          }
-        },
-        {
-          network: "4G",
-          metrics: {
-            status: {
-              result: "pass",
-              passRate: "99.5%",
-              passCount: 995,
-              failCount: 5
-            },
-            responseTime: {
-              result: "pass",
-              passRate: "97.8%",
-              passCount: 978,
-              failCount: 22
-            },
-            duration: {
-              avg: "0.8s",
-              min: "0.3s",
-              max: "2.0s",
-              med: "0.7s",
-              p90: "1.4s",
-              p95: "1.7s"
-            }
-          }
-        }
-      ]
-    }
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Temporarily using sample data while API is being developed
-        // const response = await fetch('http://localhost:5000/api/load-test-result');
-        // if (!response.ok) {
-        //   throw new Error('Failed to fetch data');
-        // }
-        // const result = await response.json();
-        
-        // Use sample data for now
-        setData(sampleData);
+        const response = await fetch('https://jwellary-backend-load-test-result.onrender.com/api/load-test-result');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const result = await response.json();
+        setData(result);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -159,7 +42,6 @@ const Card = () => {
     fetchData();
   }, []);
 
-  // Rest of your component code remains the same...
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
