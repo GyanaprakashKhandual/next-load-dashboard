@@ -1,419 +1,362 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  Wifi, 
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Activity,
+  CheckCircle,
+  XCircle,
+  Wifi,
   WifiOff,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
+  BarChart2,
+  Clock,
   Zap,
-  AlertCircle
+  AlertCircle,
+  Moon,
+  Sun
 } from 'lucide-react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  DoughnutController,
-  BarController
-} from 'chart.js';
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  DoughnutController,
-  BarController
-);
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid
+} from 'recharts';
 
 const Home = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const chartRefs = useRef({});
+  const [darkMode, setDarkMode] = useState(false);
+  const [data, setData] = useState({
+    totalApis: 100,
+    totalUserPerApi: 150,
+    avgTime: '3.1s',
+    avgPassRate: 90,
+    avgAssertionPassRate: 90,
+    avgMaxTime: '22s',
+    avgMinTime: '2.1s',
+    avgMedianTime: '5s',
+    passed: 13500,
+    failed: 1500,
+    networks: [
+      { name: '35mbps', passed: 9500, failed: 500 },
+      { name: '1mbps', passed: 4000, failed: 1000 }
+    ]
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/load-test-result');
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const result = await response.json();
-        setData(result);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (data.length > 0) {
-      createCharts();
-    }
-  }, [data]);
-
-  const createCharts = () => {
-    // Clear existing charts
-    Object.values(chartRefs.current).forEach(chart => {
-      if (chart) chart.destroy();
-    });
-    chartRefs.current = {};
-
-    data.forEach((site, siteIndex) => {
-      site.tests.forEach((test, testIndex) => {
-        const chartId = `pie-${siteIndex}-${testIndex}`;
-        const ctx = document.getElementById(chartId);
-        if (ctx) {
-          chartRefs.current[chartId] = new ChartJS(ctx, {
-            type: 'doughnut',
-            data: {
-              labels: ['Pass', 'Fail'],
-              datasets: [{
-                data: [test.metrics.status.passCount, test.metrics.status.failCount],
-                backgroundColor: ['#10b981', '#ef4444'],
-                borderColor: ['#059669', '#dc2626'],
-                borderWidth: 2
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                  labels: {
-                    color: '#e5e7eb',
-                    font: {
-                      size: 12
-                    }
-                  }
-                },
-                tooltip: {
-                  backgroundColor: '#1e293b',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  borderColor: '#475569',
-                  borderWidth: 1
-                }
-              }
-            }
-          });
-        }
-      });
-
-      // Create comparison chart
-      const comparisonCtx = document.getElementById(`comparison-${siteIndex}`);
-      if (comparisonCtx) {
-        const comparisonData = site.tests.map(test => ({
-          network: test.network,
-          responseTimePass: parseInt(test.metrics.responseTime.passRate.replace('%', '')),
-          statusPass: parseInt(test.metrics.status.passRate.replace('%', ''))
-        }));
-
-        chartRefs.current[`comparison-${siteIndex}`] = new ChartJS(comparisonCtx, {
-          type: 'bar',
-          data: {
-            labels: comparisonData.map(d => d.network),
-            datasets: [
-              {
-                label: 'Response Time Pass Rate %',
-                data: comparisonData.map(d => d.responseTimePass),
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                borderColor: 'rgba(16, 185, 129, 1)',
-                borderWidth: 1
-              },
-              {
-                label: 'Status Pass Rate %',
-                data: comparisonData.map(d => d.statusPass),
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 1
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                labels: {
-                  color: '#e5e7eb'
-                }
-              },
-              tooltip: {
-                backgroundColor: '#1e293b',
-                titleColor: '#fff',
-                bodyColor: '#fff',
-                borderColor: '#475569',
-                borderWidth: 1
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                  color: '#9ca3af'
-                },
-                grid: {
-                  color: '#374151'
-                }
-              },
-              x: {
-                ticks: {
-                  color: '#9ca3af'
-                },
-                grid: {
-                  color: '#374151'
-                }
-              }
-            }
-          }
-        });
-      }
-    });
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
   };
 
+  // Set theme colors based on dark mode
+  const colors = darkMode ? {
+    primary: 'linear-gradient(135deg, #6EE7B7, #059669)',
+    secondary: 'linear-gradient(135deg, #1E3A8A, #1E40AF)',
+    accent: 'linear-gradient(135deg, #FCA5A5, #EF4444)',
+    chartPrimary: '#6EE7B7',
+    chartAccent: '#FCA5A5',
+    white: '#1F2937',
+    background: 'linear-gradient(135deg, #111827, #1F2937)',
+    cardBg: '#1F2937',
+    border: '#374151',
+    text: '#E5E7EB',
+    textDark: '#F9FAFB',
+    sky: 'linear-gradient(135deg, #1E40AF, #1E3A8A)'
+  } : {
+    primary: 'linear-gradient(135deg, #10B981, #047857)',
+    secondary: 'linear-gradient(135deg, #ECFDF5, #D1FAE5)',
+    accent: 'linear-gradient(135deg, #EF4444, #B91C1C)',
+    chartPrimary: '#10B981',
+    chartAccent: '#EF4444',
+    white: '#FFFFFF',
+    background: 'linear-gradient(135deg, #F9FAFB, #E5E7EB)',
+    cardBg: '#FFFFFF',
+    border: '#E5E7EB',
+    text: '#374151',
+    textDark: '#1F2937',
+    sky: 'linear-gradient(135deg, #E0F2FE, #BAE6FD)'
+  };
+
+  const pieData = [
+    { name: 'Passed', value: data.passed, color: colors.chartPrimary },
+    { name: 'Failed', value: data.failed, color: colors.chartAccent }
+  ];
+
+  const barData = data.networks.map(network => ({
+    name: network.name,
+    Passed: network.passed,
+    Failed: network.failed
+  }));
+
+  const totalTests = data.totalApis * data.totalUserPerApi;
+
+  // Animation variants
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
+    hidden: { opacity: 0 },
+    show: {
       opacity: 1,
-      y: 0,
       transition: {
-        duration: 0.6,
         staggerChildren: 0.1
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
+    hidden: { y: 20, opacity: 0 },
+    show: { 
+      y: 0, 
       opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 }
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 10
+      }
     }
   };
 
-  const getNetworkIcon = (network) => {
-    if (network.includes('35mbps')) return <Wifi className="w-5 h-5 text-green-400" />;
-    if (network.includes('1mbps')) return <WifiOff className="w-5 h-5 text-red-400" />;
-    return <Activity className="w-5 h-5 text-blue-400" />;
+  const chartVariants = {
+    hidden: { scale: 0.9, opacity: 0 },
+    show: { 
+      scale: 1, 
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 80,
+        damping: 15
+      }
+    }
   };
-
-  const getStatusColor = (result) => {
-    return result === 'pass' ? 'text-green-400' : 'text-red-400';
-  };
-
-  const getStatusIcon = (result) => {
-    return result === 'pass' ? 
-      <CheckCircle className="w-4 h-4 text-green-400" /> : 
-      <XCircle className="w-4 h-4 text-red-400" />;
-  };
-
-  const getMetricTrend = (passRate) => {
-    const rate = parseInt(passRate.replace('%', ''));
-    return rate >= 80 ? 
-      <TrendingUp className="w-4 h-4 text-green-400" /> : 
-      <TrendingDown className="w-4 h-4 text-red-400" />;
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center text-white"
-        >
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Error Loading Data</h2>
-          <p className="text-gray-300">{error}</p>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen max-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <motion.div
-        variants={containerVariants}
+    <div 
+      className={`h-screen overflow-y-auto p-4 transition-colors duration-300 ${darkMode ? 'dark' : ''}`}
+      style={{ 
+        background: colors.background,
+        minHeight: '100vh'
+      }}
+    >
+
+      <motion.div 
         initial="hidden"
-        animate="visible"
-        className="max-w-7xl mx-auto h-full"
+        animate="show"
+        variants={containerVariants}
+        className="h-full flex flex-col"
       >
-        {/* Header */}
-        <motion.div variants={itemVariants} className="mb-6">
-          <div className="flex items-center space-x-3 mb-2">
-            <BarChart3 className="w-8 h-8 text-purple-400" />
-            <h1 className="text-3xl font-bold text-white">Load Test Dashboard</h1>
-          </div>
-          <p className="text-gray-300">Real-time performance metrics and analysis</p>
-        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 flex-grow overflow-hidden">
+          {/* Total APIs */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<Activity className="w-6 h-6" />} 
+              title="Total APIs" 
+              value={data.totalApis} 
+              colors={colors} 
+              gradient={colors.secondary}
+            />
+          </motion.div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)] overflow-y-auto">
-          {data.map((site, siteIndex) => (
-            <motion.div
-              key={siteIndex}
-              variants={itemVariants}
-              className="lg:col-span-3 space-y-6"
-            >
-              {/* Site Header */}
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-                <h2 className="text-xl font-semibold text-white capitalize mb-4 flex items-center space-x-2">
-                  <Activity className="w-6 h-6 text-purple-400" />
-                  <span>{site.name}</span>
-                </h2>
-                
-                {/* Network Tests Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {site.tests.map((test, testIndex) => (
-                    <motion.div
-                      key={testIndex}
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                      className="bg-slate-800/70 border border-slate-600/50 rounded-lg p-6 space-y-4"
-                    >
-                      {/* Network Header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {getNetworkIcon(test.network)}
-                          <span className="text-lg font-medium text-white">{test.network}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(test.metrics.status.result)}
-                          <span className={`text-sm font-medium ${getStatusColor(test.metrics.status.result)}`}>
-                            {test.metrics.status.result.toUpperCase()}
-                          </span>
-                        </div>
-                      </div>
+          {/* Total Users */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<Zap className="w-6 h-6" />} 
+              title="Total Users" 
+              value={totalTests} 
+              colors={colors} 
+              gradient={colors.sky}
+            />
+          </motion.div>
 
-                      {/* Metrics Grid */}
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Status Metrics */}
-                        <div className="bg-slate-700/50 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <CheckCircle className="w-4 h-4 text-green-400" />
-                              <span className="text-sm text-gray-300">Status</span>
-                            </div>
-                            {getMetricTrend(test.metrics.status.passRate)}
-                          </div>
-                          <div className="text-2xl font-bold text-white">
-                            {test.metrics.status.passRate}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {test.metrics.status.passCount} pass / {test.metrics.status.failCount} fail
-                          </div>
-                        </div>
+          {/* Pass Rate */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<CheckCircle className="w-6 h-6" />} 
+              title="Avg Pass Rate" 
+              value={`${data.avgPassRate}%`} 
+              colors={colors} 
+              gradient={colors.secondary}
+            />
+          </motion.div>
 
-                        {/* Response Time */}
-                        <div className="bg-slate-700/50 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <Clock className="w-4 h-4 text-blue-400" />
-                              <span className="text-sm text-gray-300">Response Time</span>
-                            </div>
-                            {getMetricTrend(test.metrics.responseTime.passRate)}
-                          </div>
-                          <div className="text-2xl font-bold text-white">
-                            {test.metrics.responseTime.passRate}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {test.metrics.responseTime.passCount} pass / {test.metrics.responseTime.failCount} fail
-                          </div>
-                        </div>
-                      </div>
+          {/* Assertion Pass Rate */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<CheckCircle className="w-6 h-6" />} 
+              title="Assertion Pass Rate" 
+              value={`${data.avgAssertionPassRate}%`} 
+              colors={colors} 
+              gradient={colors.secondary}
+            />
+          </motion.div>
 
-                      {/* Duration Stats */}
-                      <div className="bg-slate-700/30 rounded-lg p-4">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <Zap className="w-4 h-4 text-yellow-400" />
-                          <span className="text-sm text-gray-300">Duration Metrics</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 text-xs">
-                          <div className="text-center">
-                            <div className="text-white font-semibold">{test.metrics.duration.avg}</div>
-                            <div className="text-gray-400">Avg</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-white font-semibold">{test.metrics.duration.med}</div>
-                            <div className="text-gray-400">Median</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-white font-semibold">{test.metrics.duration.max}</div>
-                            <div className="text-gray-400">Max</div>
-                          </div>
-                        </div>
-                      </div>
+          {/* Avg Time */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<Clock className="w-6 h-6" />} 
+              title="Avg Time" 
+              value={data.avgTime} 
+              colors={colors} 
+              gradient={colors.sky}
+            />
+          </motion.div>
 
-                      {/* Pie Chart */}
-                      <div className="bg-slate-700/30 rounded-lg p-4">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <BarChart3 className="w-4 h-4 text-purple-400" />
-                          <span className="text-sm text-gray-300">Pass/Fail Distribution</span>
-                        </div>
-                        <div className="h-40">
-                          <canvas id={`pie-${siteIndex}-${testIndex}`} className="w-full h-full"></canvas>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+          {/* Avg Max */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<Clock className="w-6 h-6" />} 
+              title="Max Time" 
+              value={data.avgMaxTime} 
+              colors={colors} 
+              gradient={colors.sky}
+            />
+          </motion.div>
 
-                {/* Comparison Chart */}
-                <motion.div
-                  variants={itemVariants}
-                  className="mt-6 bg-slate-800/70 border border-slate-600/50 rounded-lg p-6"
-                >
-                  <div className="flex items-center space-x-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-green-400" />
-                    <h3 className="text-lg font-semibold text-white">Network Performance Comparison</h3>
-                  </div>
-                  <div className="h-64">
-                    <canvas id={`comparison-${siteIndex}`} className="w-full h-full"></canvas>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          ))}
+          {/* Avg Min */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<Clock className="w-6 h-6" />} 
+              title="Min Time" 
+              value={data.avgMinTime} 
+              colors={colors} 
+              gradient={colors.sky}
+            />
+          </motion.div>
+
+          {/* Avg Median */}
+          <motion.div variants={itemVariants}>
+            <Card 
+              icon={<Clock className="w-6 h-6" />} 
+              title="Median Time" 
+              value={data.avgMedianTime} 
+              colors={colors} 
+              gradient={colors.sky}
+            />
+          </motion.div>
+
+          {/* Pie Chart */}
+          <motion.div 
+            variants={chartVariants}
+            className="col-span-1 md:col-span-2"
+          >
+            <div className="h-full p-6 rounded-xl shadow-lg" style={{ 
+              backgroundColor: colors.cardBg, 
+              border: `1px solid ${colors.border}`,
+            }}>
+              <h3 className="font-medium mb-4 text-lg" style={{ color: colors.textDark }}>Overall Test Status</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie 
+                    data={pieData} 
+                    dataKey="value" 
+                    nameKey="name" 
+                    outerRadius={80}
+                    animationBegin={200}
+                    animationDuration={1000}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: colors.cardBg,
+                      borderColor: colors.border,
+                      borderRadius: '0.5rem',
+                      color: colors.text
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{
+                      color: colors.text
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
+          {/* Bar Chart */}
+          <motion.div 
+            variants={chartVariants}
+            className="col-span-1 md:col-span-2"
+          >
+            <div className="h-full p-6 rounded-xl shadow-lg" style={{ 
+              backgroundColor: colors.cardBg, 
+              border: `1px solid ${colors.border}`,
+            }}>
+              <h3 className="font-medium mb-4 text-lg" style={{ color: colors.textDark }}>Network Performance</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={barData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke={colors.text} 
+                    tick={{ fill: colors.text }}
+                  />
+                  <YAxis 
+                    stroke={colors.text} 
+                    tick={{ fill: colors.text }}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: colors.cardBg,
+                      borderColor: colors.border,
+                      borderRadius: '0.5rem',
+                      color: colors.text
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{
+                      color: colors.text
+                    }}
+                  />
+                  <Bar 
+                    dataKey="Passed" 
+                    fill={colors.chartPrimary} 
+                    animationBegin={200}
+                    animationDuration={1000}
+                  />
+                  <Bar 
+                    dataKey="Failed" 
+                    fill={colors.chartAccent} 
+                    animationBegin={200}
+                    animationDuration={1000}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
         </div>
       </motion.div>
     </div>
   );
 };
+
+const Card = ({ icon, title, value, colors, gradient }) => (
+  <motion.div 
+    className="h-full p-6 rounded-xl shadow-lg flex flex-col"
+    style={{ 
+      background: gradient,
+      border: `1px solid ${colors.border}`,
+    }}
+    whileHover={{
+      y: -5,
+      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+      transition: { duration: 0.3 }
+    }}
+  >
+    <div className="flex items-center space-x-3 mb-4">
+      <div className="p-2 rounded-full" style={{
+        backgroundColor: colors.white,
+        opacity: 0.3
+      }}>
+        {icon}
+      </div>
+      <h3 className="font-medium text-lg" style={{ color: colors.textDark }}>{title}</h3>
+    </div>
+    <motion.p 
+      className="text-3xl font-bold mt-auto"
+      style={{ color: colors.textDark }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+    >
+      {value}
+    </motion.p>
+  </motion.div>
+);
 
 export default Home;
