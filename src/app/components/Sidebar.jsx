@@ -26,10 +26,9 @@ import TableView from '../pages/Table';
 import ChartView from '../pages/Chart';
 
 const Sidebar = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  // State declarations that don't depend on sidebarItems
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
-  const [currentComponent, setCurrentComponent] = useState(<Home />);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,123 +38,17 @@ const Sidebar = () => {
   const [avgTimeRange, setAvgTimeRange] = useState([0, 10]);
   const [expandedSection, setExpandedSection] = useState(null);
 
-  const networkTypes = ['35mbps', '1mbps', '100mbps', '10mbps', '5mbps'];
-  const assertionStatuses = ['passed', 'failed', 'pending'];
-  const testStatuses = ['pass', 'fail', 'running', 'queued'];
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0, x: -60 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.6,
-        staggerChildren: 0.1,
-        ease: 'easeOut'
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.4, ease: 'easeOut' }
-    }
-  };
-
-  const iconVariants = {
-    rest: { scale: 1, rotate: 0 },
-    hover: {
-      scale: 1.1,
-      transition: { duration: 0.2, ease: 'easeInOut' }
-    },
-    tap: { scale: 0.95 }
-  };
-
-  const tooltipVariants = {
-    hidden: { opacity: 0, x: -10, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      scale: 1,
-      transition: { duration: 0.3, ease: 'easeOut' }
-    }
-  };
-
-  const themeIconVariants = {
-    moon: { rotate: 0, scale: 1 },
-    sun: { rotate: 360, scale: 1.1 },
-    transition: { duration: 0.5, ease: "easeInOut" }
-  };
-
-  const loadingVariants = {
-    rotate: {
-      rotate: 360,
-      transition: {
-        duration: 1,
-        repeat: Infinity,
-        ease: "linear"
-      }
-    }
-  };
-
-  // Toggle filter sidebar
+  // Function declarations that are used in sidebarItems
   const toggleFilter = () => {
     setFilterOpen(!filterOpen);
   };
 
-  // Handle network type selection
-  const handleNetworkType = (type) => {
-    setNetworkType(prev =>
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    );
-  };
-
-  // Handle assertion status selection
-  const handleAssertionStatus = (status) => {
-    setAssertionStatus(prev =>
-      prev.includes(status)
-        ? prev.filter(s => s !== status)
-        : [...prev, status]
-    );
-  };
-
-  // Handle test status selection
-  const handleTestStatus = (status) => {
-    setTestStatus(prev =>
-      prev.includes(status)
-        ? prev.filter(s => s !== status)
-        : [...prev, status]
-    );
-  };
-
-  // Toggle section expansion
-  const toggleSection = (section) => {
-    setExpandedSection(prev => prev === section ? null : section);
-  };
-
-  // Check for user's preferred color scheme
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setDarkMode(isDark);
-      document.documentElement.classList.toggle('dark', isDark);
-    }
-  }, []);
-
-  // Toggle dark mode
   const toggleDarkMode = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
   };
 
-  // Generate PDF from Table component
   const generatePDF = async () => {
     setIsGeneratingPDF(true);
     
@@ -306,6 +199,160 @@ const Sidebar = () => {
     }
   };
 
+  // Define sidebarItems after all the functions it uses are defined
+  const sidebarItems = [
+    { icon: FaHome, label: 'Home', component: <Home /> },
+    { icon: Table, label: 'Table View', component: <TableView /> },
+    { icon: CreditCard, label: 'Card View', component: <Card /> },
+    { icon: PieChart, label: 'Chart View', component: <ChartView /> },
+    { icon: Bug, label: 'Bugs', component: <Home /> },
+    {
+      icon: FaFileExport, 
+      label: 'Download PDF', 
+      component: <Home />, 
+      action: generatePDF,
+      isLoading: isGeneratingPDF 
+    },
+    { icon: Sheet, label: 'Documentation', component: <Home /> },
+    { icon: TrendingUp, label: 'Comments', component: <Home /> },
+    { icon: User, label: 'Project', component: <Home /> },
+    { icon: Lightbulb, label: 'Suggestions', component: <Home /> },
+    { 
+      icon: Filter, 
+      label: 'Filter',
+      action: toggleFilter
+    },
+    { 
+      icon: darkMode ? FaSun : FaMoon, 
+      label: darkMode ? 'Light Mode' : 'Dark Mode',
+      action: toggleDarkMode
+    },
+    { icon: RotateCcw, label: 'Refresh' },
+  ];
+
+  // Now define state that uses sidebarItems
+  const [activeIndex, setActiveIndex] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedIndex = localStorage.getItem('sidebarActiveIndex');
+      return savedIndex ? parseInt(savedIndex) : 0;
+    }
+    return 0;
+  });
+
+  const [currentComponent, setCurrentComponent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedIndex = localStorage.getItem('sidebarActiveIndex');
+      const index = savedIndex ? parseInt(savedIndex) : 0;
+      return sidebarItems[index]?.component || <Home />;
+    }
+    return <Home />;
+  });
+
+  // Constants
+  const networkTypes = ['35mbps', '1mbps', '100mbps', '10mbps', '5mbps'];
+  const assertionStatuses = ['passed', 'failed', 'pending'];
+  const testStatuses = ['pass', 'fail', 'running', 'queued'];
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, x: -60 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+        ease: 'easeOut'
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.4, ease: 'easeOut' }
+    }
+  };
+
+  const iconVariants = {
+    rest: { scale: 1, rotate: 0 },
+    hover: {
+      scale: 1.1,
+      transition: { duration: 0.2, ease: 'easeInOut' }
+    },
+    tap: { scale: 0.95 }
+  };
+
+  const tooltipVariants = {
+    hidden: { opacity: 0, x: -10, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+      transition: { duration: 0.3, ease: 'easeOut' }
+    }
+  };
+
+  const themeIconVariants = {
+    moon: { rotate: 0, scale: 1 },
+    sun: { rotate: 360, scale: 1.1 },
+    transition: { duration: 0.5, ease: "easeInOut" }
+  };
+
+  const loadingVariants = {
+    rotate: {
+      rotate: 360,
+      transition: {
+        duration: 1,
+        repeat: Infinity,
+        ease: "linear"
+      }
+    }
+  };
+
+  // Handle network type selection
+  const handleNetworkType = (type) => {
+    setNetworkType(prev =>
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
+  };
+
+  // Handle assertion status selection
+  const handleAssertionStatus = (status) => {
+    setAssertionStatus(prev =>
+      prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  // Handle test status selection
+  const handleTestStatus = (status) => {
+    setTestStatus(prev =>
+      prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  // Toggle section expansion
+  const toggleSection = (section) => {
+    setExpandedSection(prev => prev === section ? null : section);
+  };
+
+  // Check for user's preferred color scheme
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(isDark);
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+  }, []);
+
   // Apply filters
   const applyFilters = () => {
     console.log('Filters applied:', {
@@ -332,6 +379,7 @@ const Sidebar = () => {
     
     if (item.label !== 'Analysis') {
       setActiveIndex(index);
+      localStorage.setItem('sidebarActiveIndex', index.toString());
     }
     
     if (item.action) {
@@ -341,36 +389,7 @@ const Sidebar = () => {
     }
   };
 
-  const sidebarItems = [
-    { icon: FaHome, label: 'Home', component: <Home /> },
-    { icon: Table, label: 'Table View', component: <TableView /> },
-    { icon: CreditCard, label: 'Card View', component: <Card/> },
-    { icon: PieChart, label: 'Chart View', component: <ChartView /> },
-    { icon: Bug, label: 'Bugs', component: <Home /> },
-    { 
-      icon: FaFileExport, 
-      label: 'Download PDF', 
-      component: <Home />, 
-      action: generatePDF,
-      isLoading: isGeneratingPDF 
-    },
-    { icon: Sheet, label: 'Documentation', component: <Home/> },
-    { icon: TrendingUp, label: 'Comments', component: <Home /> },
-    { icon: User, label: 'Project', component: <Home /> },
-    { icon: Lightbulb, label: 'Suggestions', component: <Home /> },
-    { 
-      icon: Filter, 
-      label: 'Filter',
-      action: toggleFilter
-    },
-    { 
-      icon: darkMode ? FaSun : FaMoon, 
-      label: darkMode ? 'Light Mode' : 'Dark Mode',
-      action: toggleDarkMode
-    },
-    { icon: RotateCcw, label: 'Refresh' },
-  ];
-
+  // Rest of your component code...
   return (
     <div className={`flex h-screen ${darkMode ? 'dark' : ''}`}>
       {/* Main Sidebar */}
