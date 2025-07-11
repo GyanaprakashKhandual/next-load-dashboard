@@ -403,7 +403,7 @@ const Sidebar = () => {
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-col py-4 space-y-2 user-select-none">
+        <div className="flex flex-col py-0.5 space-y-2 user-select-none">
           {sidebarItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = activeIndex === index;
@@ -423,7 +423,7 @@ const Sidebar = () => {
                 onHoverEnd={() => setHoveredIndex(null)}
               >
                 <motion.button
-                  className={`w-full h-12 flex items-center justify-center relative overflow-visible ${
+                  className={`w-full h-12 flex items-center justify-center relative overflow-visible  ${
                     isLoading ? 'cursor-not-allowed opacity-75' : ''
                   }`}
                   onClick={() => !isLoading && handleItemClick(index)}
